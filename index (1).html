@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central WhatsApp — Clínica</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:#C9847A;--rose-light:#E8B4AE;--nude:#F5EDE8;
+    --gold:#C4A882;--gold-light:#EAD9C4;--dark:#2C1F1A;
+    --mid:#7A5C52;--white:#FDFAF8;--green-wpp:#DCF8C6;
+    --green-fid:#E8F5E9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--dark);}
+  header{background:linear-gradient(135deg,#2C1F1A 0%,#4A2E26 55%,#C9847A 100%);padding:40px 24px 32px;text-align:center;position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 40%,rgba(201,132,122,0.3) 0%,transparent 65%);}
+  header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,4vw,2.1rem);font-weight:300;color:var(--nude);letter-spacing:0.04em;position:relative;}
+  header p{font-size:0.75rem;color:var(--rose-light);margin-top:7px;letter-spacing:0.12em;text-transform:uppercase;position:relative;}
+  .tab-bar{background:#fff;border-bottom:2px solid var(--gold-light);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(44,31,26,0.07);}
+  .tab-bar::-webkit-scrollbar{display:none;}
+  .tab-btn{flex-shrink:0;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:13px 18px;font-size:0.78rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;white-space:nowrap;transition:all 0.2s;}
+  .tab-btn:hover{color:var(--rose);}
+  .tab-btn.active{color:var(--rose);border-bottom-color:var(--rose);}
+  .subnav-wrap{background:var(--nude);border-bottom:1px solid var(--gold-light);display:none;}
+  .subnav-wrap.visible{display:block;}
+  .subnav-scroll{display:flex;overflow-x:auto;gap:4px;padding:10px 16px;scrollbar-width:none;}
+  .subnav-scroll::-webkit-scrollbar{display:none;}
+  .subnav-btn{flex-shrink:0;background:#fff;border:1px solid var(--gold-light);border-radius:20px;padding:5px 13px;font-size:0.71rem;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.03em;transition:all 0.2s;white-space:nowrap;}
+  .subnav-btn:hover,.subnav-btn.active{background:linear-gradient(135deg,var(--rose),var(--gold));border-color:transparent;color:white;}
+  .container{max-width:740px;margin:0 auto;padding:30px 20px 60px;}
+  .painel{display:none;animation:fadeIn 0.3s ease;}
+  .painel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .procedimento{display:none;animation:fadeIn 0.3s ease;}
+  .procedimento.active{display:block;}
+  .proc-title{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;color:var(--dark);margin-bottom:4px;}
+  .proc-preco{font-size:0.75rem;color:var(--rose);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:26px;padding-bottom:14px;border-bottom:1px solid var(--gold-light);}
+  .etapa{margin-bottom:30px;}
+  .etapa-header{display:flex;align-items:flex-start;gap:13px;margin-bottom:11px;}
+  .etapa-num{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--gold));color:white;font-size:0.74rem;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .etapa-titulo{font-size:0.93rem;font-weight:500;color:var(--dark);line-height:1.3;}
+  .etapa-quando{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--rose);margin-top:3px;}
+  .variante-label{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--mid);margin:14px 0 7px;padding-left:2px;}
+  .variante-label.fid{color:#5a8a5a;}
+  .wpp-bubble{background:var(--green-wpp);border-radius:0 16px 16px 16px;padding:13px 15px;position:relative;box-shadow:0 2px 8px rgba(44,31,26,0.07);line-height:1.65;font-size:0.865rem;color:#1a1a1a;white-space:pre-wrap;word-break:break-word;}
+  .wpp-bubble.fidelizada{background:var(--green-fid);border-left:3px solid #81c784;}
+  .wpp-bubble::before{content:'';position:absolute;top:0;left:-8px;border-width:0 9px 9px 0;border-style:solid;border-color:transparent var(--green-wpp) transparent transparent;}
+  .wpp-bubble.fidelizada::before{border-color:transparent var(--green-fid) transparent transparent;}
+  .wpp-time{font-size:0.67rem;color:#999;text-align:right;margin-top:5px;}
+  .copy-btn{margin-top:7px;background:none;border:1px solid var(--gold-light);border-radius:20px;padding:5px 13px;font-size:0.71rem;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;transition:all 0.2s;}
+  .copy-btn:hover{background:var(--gold-light);color:var(--dark);}
+  .copy-btn.copied{background:#DCF8C6;border-color:#a8d8a0;color:#3a7a3a;}
+  .divisor{display:flex;align-items:center;gap:12px;margin:4px 0 20px 46px;}
+  .divisor-line{flex:1;height:1px;background:linear-gradient(to right,var(--gold-light),transparent);}
+  .divisor-icon{color:var(--rose-light);font-size:0.85rem;}
+  .sec-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;color:var(--dark);margin-bottom:4px;}
+  .sec-sub{font-size:0.73rem;color:var(--mid);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--gold-light);}
+  .grupo-titulo{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--dark);margin:28px 0 14px;display:flex;align-items:center;gap:8px;}
+  .grupo-titulo::after{content:'';flex:1;height:1px;background:var(--gold-light);}
+  .cuidados-box{background:#fff;border:1px solid var(--gold-light);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+  .cuidados-box h4{font-size:0.8rem;font-weight:500;color:var(--rose);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+  .cuidado-item{display:flex;gap:10px;align-items:flex-start;font-size:0.84rem;color:var(--dark);line-height:1.5;margin-bottom:7px;}
+  .cuidado-item:last-child{margin-bottom:0;}
+  .cuidado-dot{color:var(--rose);font-size:1rem;flex-shrink:0;margin-top:1px;}
+  .fid-badge{display:inline-block;background:#e8f5e9;color:#4caf50;font-size:0.63rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;border-radius:10px;padding:2px 8px;margin-left:6px;vertical-align:middle;border:1px solid #a5d6a7;}
+  footer{text-align:center;padding:26px 20px;font-size:0.73rem;color:var(--mid);border-top:1px solid var(--gold-light);font-family:'Cormorant Garamond',serif;font-style:italic;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Central de Mensagens — WhatsApp</h1>
+  <p>Captação · Lembretes · Pós-Procedimento · Resgate</p>
+</header>
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="captacao">💬 Captação</button>
+  <button class="tab-btn" data-tab="lembretes">📅 Lembretes</button>
+  <button class="tab-btn" data-tab="pos">🌿 Pós-Procedimento</button>
+  <button class="tab-btn" data-tab="resgate">💛 Resgate</button>
+</div>
+<div class="subnav-wrap visible" id="subnav-captacao"><div class="subnav-scroll" id="nav-captacao"></div></div>
+<div class="subnav-wrap" id="subnav-pos"><div class="subnav-scroll" id="nav-pos"></div></div>
+<div class="subnav-wrap" id="subnav-lembretes"><div class="subnav-scroll" id="nav-lembretes"></div></div>
+<div class="container">
+  <div class="painel active" id="painel-captacao"></div>
+  <div class="painel" id="painel-lembretes"></div>
+  <div class="painel" id="painel-pos"></div>
+  <div class="painel" id="painel-resgate"></div>
+</div>
+<footer>Substitua [nome] pelo nome da paciente antes de enviar 🌸</footer>
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+try {
+
+// ─── HELPER: gera etapas padrão de captação ───────────────
+function etapasPadrao(proc, preco1, parcela, fidelizadaTexto){
+  return [
+    { num:"01", titulo:"Primeira resposta — Apresentar valor antes do preço", quando:"Quando a paciente pergunta o preço",
+      mensagens:[
+        { label:"Versão padrão", texto:proc.msgPadrao },
+        { label:"Versão fidelizada 💚", fid:true, texto:fidelizadaTexto }
+      ]
+    },
+    { num:"02", titulo:"Paciente pede desconto", quando:"Quando ela questiona o valor", mensagens:[{ label:null, texto:proc.msgDesconto }] },
+    { num:"03", titulo:"Paciente sumiu após ver o preço", quando:"1º follow-up — após 2 a 3 dias sem resposta",
+      mensagens:[
+        { label:"Versão A — Leve e curiosa", texto:proc.msgSumiu_A },
+        { label:"Versão B — Urgência suave", texto:proc.msgSumiu_B }
+      ]
+    },
+    { num:"04", titulo:"Paciente ainda não respondeu", quando:"2º follow-up — após mais 3 a 5 dias", mensagens:[{ label:null, texto:proc.msgSilencio }] },
+    { num:"05", titulo:"Reativação futura", quando:"Após 2 a 4 semanas", mensagens:[{ label:null, texto:proc.msgReativacao }] }
+  ];
+}
+
+// ─── DADOS CAPTAÇÃO ───────────────────────────────────────
+const procRaw = [
+  {
+    id:"botox", nome:"Toxina Botulínica", emoji:"✨",
+    preco:"3 regiões / 50U — À vista: R$ 1.300,00 · Parcelado: 6x de R$ 241,67",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue bom que você está pensando em cuidar da sua expressão! A toxina botulínica é o procedimento mais solicitado no mundo — e com razão: ela suaviza linhas de expressão, previne o envelhecimento e dá um visual mais descansado e renovado, de forma completamente natural.\n\nAqui trabalho com técnica personalizada para o seu rosto, respeitando a sua expressão e garantindo um resultado harmônico e seguro. 🤍\n\nO investimento para *3 regiões (50U)* é:\n💳 *À vista: R$ 1.300,00*\n📆 *Parcelado: 6x de R$ 241,67*\n\nQuer saber mais ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], amor!* 😊🌸\n\nQue saudades! Fico tão feliz que você está pensando em renovar a toxina botulínica — você já sabe como o resultado fica lindo em você!\n\nComo você já é da família aqui da clínica, fica à vontade para agendar quando quiser que eu já separo o seu horário com carinho. 🤍\n\nO investimento continua:\n💳 *À vista: R$ 1.300,00*\n📆 *Parcelado: 6x de R$ 241,67*\n\nMe fala um dia bom pra você! 💛`,
+    msgDesconto:`[Nome], entendo que o investimento é uma consideração importante! 😊\n\nA toxina botulínica exige produto registrado, dose calibrada e aplicação com precisão milimétrica. O valor reflete qualidade, segurança e um resultado que dura.\n\nO que posso oferecer é parcelar em *6x de R$ 241,67* — acessível sem comprometer nada.\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a toxina botulínica! Sabe que às vezes a gente precisa de um tempo — e tá tudo bem. Se quiser conversar, estou aqui! 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda desse mês está quase fechada e lembrei que você tinha interesse na toxina botulínica.\n\nO resultado é transformador quando feito com a técnica certa — e é exatamente isso que ofereço aqui. 🤍\n\nSe quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nNão quero ser insistente, mas não podia deixar de mandar uma última mensagem.\n\nA toxina botulínica bem aplicada deixa o seu rosto tão descansado e leve quanto você merece parecer. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos e lembrei de você! Abriram horários novos essa semana — se a vontade ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"olheiras", nome:"Preench. Olheiras", emoji:"👁",
+    preco:"1ml ácido hialurônico — R$ 1.350,00 por seringa · Parcelado: 6x de R$ 225,00",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando em tratar as olheiras! O preenchimento com ácido hialurônico é uma das técnicas mais delicadas e transformadoras da medicina estética — ele preenche o sulco, atenua as sombras e devolve leveza ao olhar, sem aparência artificial.\n\nAqui utilizo produto de alta qualidade com técnica cuidadosa e personalizada. 🤍\n\nO investimento é *R$ 1.350,00 por seringa (1ml)*:\n💳 *À vista: R$ 1.350,00*\n📆 *Parcelado: 6x de R$ 225,00*\n\n*O número de seringas depende da sua avaliação individual.*\n\nQuer saber mais ou já agendamos? Te espero! 🌸`,
+    msgFidelizada:`*[Nome], que bom te ver por aqui!* 👁🌸\n\nVocê já conhece o quanto eu gosto de cuidar do seu olhar — e fico feliz que esteja pensando nessa renovação!\n\nPara você, minha paciente especial, o investimento é:\n💳 *À vista: R$ 1.350,00 por seringa*\n📆 *Parcelado: 6x de R$ 225,00*\n\nSó me fala quando quiser agendar que eu já reservo o seu horário com todo carinho. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO preenchimento de olheiras é uma das técnicas mais exigentes da estética — região delicada, produto de alta qualidade e domínio técnico. O valor reflete isso.\n\nO parcelamento em *6x de R$ 225,00* torna bem mais acessível. 🤍\n\nQue tal uma avaliação presencial? Assim explico tudo e você decide com calma. 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o preenchimento de olheiras! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse no preenchimento de olheiras.\n\nUm olhar leve e descansado transforma o rosto inteiro. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem, prometo! O olhar descansado que o preenchimento de olheiras proporciona é um dos resultados mais marcantes que vejo aqui na clínica.\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no preenchimento de olheiras ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"labial", nome:"Preench. Labial", emoji:"💋",
+    preco:"1ml ácido hialurônico — À vista: R$ 1.200,00 · Parcelado: 6x de R$ 216,67",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando em cuidar dos seus lábios! O preenchimento labial devolve volume, define o contorno e deixa tudo mais equilibrado, sem aquele aspecto exagerado.\n\nAqui utilizo ácido hialurônico de alta qualidade, com técnica personalizada para o seu formato de lábio. 🤍\n\nO investimento é:\n💳 *À vista: R$ 1.200,00*\n📆 *Parcelado: 6x de R$ 216,67*\n\nQuer saber mais ou já agendamos? Te espero! 🌸`,
+    msgFidelizada:`*[Nome], minha querida!* 💋😊\n\nQue delícia receber sua mensagem! Você já sabe como o resultado fica maravilhoso em você — tenho saudades dos seus lábios na clínica! 🌸\n\nPara você:\n💳 *À vista: R$ 1.200,00*\n📆 *Parcelado: 6x de R$ 216,67*\n\nMe fala quando você quer vir e eu já separo o horário. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO preenchimento labial envolve material de alta qualidade, técnica especializada e toda a segurança que você merece. O parcelamento em *6x de R$ 216,67* torna bem mais acessível.\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o preenchimento labial! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda desse mês está quase fechada e lembrei que você tinha interesse no preenchimento labial.\n\nO resultado é lindo quando feito com cuidado e técnica. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nNão podia deixar de mandar uma última mensagem. O preenchimento labial bem feito só realça o que já é bonito em você. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no preenchimento labial ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"microagulhamento", nome:"Microagulhamento", emoji:"🔬",
+    preco:"Sessão avulsa: R$ 510,00 · Pacote 3 sessões: R$ 1.320,00 · Parcelado: 6x de R$ 220,00",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nÓtima escolha! O microagulhamento é um dos procedimentos mais versáteis e eficazes da estética — indicado para cicatrizes de acne, melasma, estrias, rejuvenescimento, alopecia e muito mais.\n\nAqui trabalho com ativos personalizados para o seu caso. 🤍\n\nO investimento é:\n✨ *Sessão avulsa: R$ 510,00*\n💎 *Pacote 3 sessões: R$ 1.320,00* (economia de R$ 210,00)\n📆 *Pacote parcelado: 6x de R$ 220,00*\n\nO pacote é o mais indicado, já que os resultados se potencializam com as sessões sequenciais!\n\nQuer saber mais ou já agendamos? 🌸`,
+    msgFidelizada:`*[Nome], que bom!* 🔬😊\n\nVocê já sabe como a sua pele responde bem ao microagulhamento — e fico feliz que esteja pensando em continuar o tratamento!\n\nPara você:\n✨ *Sessão avulsa: R$ 510,00*\n💎 *Pacote 3 sessões: R$ 1.320,00*\n📆 *Parcelado: 6x de R$ 220,00*\n\nSó me fala quando quiser retomar que já reservo o seu dia. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO microagulhamento envolve equipamento profissional, ativos específicos e técnica criteriosa para garantir segurança e resultado.\n\nO *pacote de 3 sessões por R$ 1.320,00* já é uma economia real — e pode ser parcelado em *6x de R$ 220,00*. 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o microagulhamento! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse no microagulhamento.\n\nA transformação que esse tratamento proporciona na pele começa já nas primeiras sessões. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! O microagulhamento bem feito transforma a textura da pele de um jeito que a gente sente e vê.\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no microagulhamento ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"escleroterapia", nome:"Escleroterapia", emoji:"🩺",
+    preco:"Sessão: R$ 410,00 · À vista: R$ 380,00 · Parcelado: 6x de R$ 68,33",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue bom que você está buscando tratamento para os microvasos! A escleroterapia é o procedimento mais eficaz e seguro para eliminar vasinhos nas pernas — feita com injeções precisas que fazem os vasos desaparecerem progressivamente.\n\nAqui trabalho com técnica cuidadosa e produto de qualidade. 🤍\n\nO investimento é:\n💳 *À vista: R$ 380,00*\n🧾 *Sessão: R$ 410,00*\n📆 *Parcelado: 6x de R$ 68,33*\n\n*O número de sessões varia conforme a extensão dos vasinhos.*\n\nQuer saber mais ou já agendamos? 🌸`,
+    msgFidelizada:`*[Nome], oi!* 🩺😊\n\nQue bom que está pensando em continuar o tratamento dos vasinhos! Você já sabe como o resultado vai ficando cada vez melhor com as sessões.\n\nPara você:\n💳 *À vista: R$ 380,00*\n🧾 *Sessão: R$ 410,00*\n📆 *Parcelado: 6x de R$ 68,33*\n\nSó me fala quando quiser agendar! 🌸🤍`,
+    msgDesconto:`[Nome], entendo! 😊\n\nA escleroterapia exige técnica precisa e atenção redobrada à segurança — o valor reflete isso. Já trabalhamos com preço acessível, e o parcelamento em *6x de R$ 68,33* torna ainda mais fácil começar! 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a escleroterapia! Se quiser saber mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase fechada esse mês e lembrei que você tinha interesse na escleroterapia.\n\nPernas sem vasinhos é um resultado que muda a autoestima! 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! Só queria te dizer que ver a transformação que a escleroterapia traz nas pacientes é sempre muito gratificante.\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na escleroterapia ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"gluteos", nome:"Harmoniz. Glúteos", emoji:"✦",
+    preco:"GluteoMax 5 sessões — R$ 2.200,00 · Parcelado: 6x de R$ 366,67",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando em investir nos glúteos! O GluteoMax é um protocolo exclusivo que combina técnicas injetáveis para modelar, projetar e dar volume aos glúteos de forma natural — sem cirurgia e com resultado progressivo.\n\nAqui aplico o protocolo completo com segurança e foco total no resultado. 🤍\n\nO investimento para o *pacote completo de 5 sessões*:\n💳 *R$ 2.200,00*\n📆 *Parcelado: 6x de R$ 366,67*\n\nQuer saber mais ou já agendamos? Te espero! 🌸`,
+    msgFidelizada:`*[Nome], que bom!* ✦😊\n\nVocê já sabe o quanto o GluteoMax transforma — e fico animada em continuar essa jornada com você!\n\nPara você:\n💳 *R$ 2.200,00 (pacote 5 sessões)*\n📆 *Parcelado: 6x de R$ 366,67*\n\nSó me fala quando quiser retomar e eu já reservo o seu horário. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO GluteoMax é um protocolo completo de 5 sessões com produtos e técnicas específicos — o valor já é calculado com foco em tornar o tratamento acessível. E o parcelamento em *6x de R$ 366,67* facilita ainda mais! 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a harmonização de glúteos! Se quiser saber mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase fechada esse mês e lembrei que você tinha interesse na harmonização de glúteos.\n\nVolume, projeção e silhueta definida — sem cirurgia. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! A harmonização de glúteos é um dos tratamentos que mais transforma a silhueta e a autoestima — sem cirurgia.\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na harmonização de glúteos ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"bioestimulador", nome:"Bioestimulador", emoji:"💎",
+    preco:"Hidroxiapatita de Ca — R$ 2.400,00 por região · Parcelado: 6x de R$ 400,00",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótima escolha! O bioestimulador de colágeno com hidroxiapatita de cálcio estimula o seu próprio corpo a produzir colágeno de forma natural e progressiva — pele mais firme, estruturada e com qualidade notavelmente melhorada. 🤍\n\nO investimento é *R$ 2.400,00 por região*:\n💳 *À vista: R$ 2.400,00*\n📆 *Parcelado: 6x de R$ 400,00*\n\n*Regiões e quantidade definidas na avaliação individual.*\n\nQuer saber mais ou já agendamos? Te espero! 🌸`,
+    msgFidelizada:`*[Nome], que ótimo!* 💎😊\n\nVocê já sabe como o bioestimulador transforma a pele ao longo dos meses — e fico feliz que queira continuar investindo em você mesma!\n\nPara você:\n💳 *À vista: R$ 2.400,00 por região*\n📆 *Parcelado: 6x de R$ 400,00*\n\nSó me fala quando quiser agendar e eu já cuido de tudo. 🤍💛`,
+    msgDesconto:`[Nome], entendo completamente! 😊\n\nO bioestimulador de colágeno é um produto de alto padrão — e o resultado progressivo ao longo dos meses justifica cada centavo. É um investimento de longo prazo na sua saúde e beleza. 🤍\n\nO parcelamento em *6x de R$ 400,00* torna mais acessível no mês a mês.\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o bioestimulador! Sei que é um investimento mais robusto — e adoro explicar direitinho o que ele entrega. Se quiser conversar, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase fechada esse mês e lembrei que você tinha interesse no bioestimulador de colágeno.\n\nPele mais firme, estruturada e com qualidade renovada. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! O bioestimulador é um dos tratamentos que mais me orgulha de oferecer — o resultado é transformador de verdade. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no bioestimulador ainda estiver por aí, pode me chamar. 🤍`
+  },
+  // ── NOVOS ──────────────────────────────────────────────
+  {
+    id:"skinbooster", nome:"Skinbooster", emoji:"💧",
+    preco:"Sessão: R$ 580,00 · À vista: R$ 550,00 · Parcelado: 6x de R$ 96,67",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando em Skinbooster! É um dos tratamentos mais amados por quem quer pele com brilho, viço e hidratação profunda — ele injeta ácido hialurônico diretamente na derme, promovendo uma hidratação de dentro para fora e uma luminosidade incrível.\n\nIdeal para quem quer pele mais jovem, macia e radiante sem aquele aspecto de "feito". 🤍\n\nO investimento é:\n💳 *À vista: R$ 550,00*\n🧾 *Sessão: R$ 580,00*\n📆 *Parcelado: 6x de R$ 96,67*\n\nQuer saber mais ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], que delícia receber sua mensagem!* 💧😊\n\nVocê já sabe como a pele fica com aquele brilho maravilhoso depois do Skinbooster — e eu fico sempre tão feliz com o seu resultado!\n\nPara você, minha querida:\n💳 *À vista: R$ 550,00*\n🧾 *Sessão: R$ 580,00*\n📆 *Parcelado: 6x de R$ 96,67*\n\nSó me fala quando quiser vir e eu já reservo o seu horário com todo carinho. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO Skinbooster utiliza ácido hialurônico de alta qualidade aplicado com técnica precisa — o valor reflete produto e cuidado. E já é bem acessível por sessão!\n\nO parcelamento em *6x de R$ 96,67* torna ainda mais fácil encaixar na rotina. 🤍\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o Skinbooster! Se quiser conversar mais sobre o resultado ou como funciona, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse no Skinbooster.\n\nPele hidratada, luminosa e com viço de dentro para fora — é o resultado que esse tratamento entrega. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! O Skinbooster é um dos favoritos das minhas pacientes — pele com aquele brilho saudável que todo mundo nota. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no Skinbooster ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"eletrocauterio", nome:"Eletrocautério Pálpebras", emoji:"👀",
+    preco:"Lifting de pálpebras sem cirurgia — Pacote 3 sessões: R$ 1.380,00 · Parcelado: 6x de R$ 230,00",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando no eletrocautério para as pálpebras! É um procedimento incrível — promove um *lifting de pálpebras sem cirurgia*, suavizando a flacidez da área e rejuvenescendo o olhar de forma notável e segura.\n\nIdeal para quem quer um olhar mais aberto e jovem sem passar por uma cirurgia. 🤍\n\nO investimento para o *pacote de 3 sessões*:\n💳 *R$ 1.380,00*\n📆 *Parcelado: 6x de R$ 230,00*\n\nQuer saber mais ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], que bom!* 👀😊\n\nVocê já sabe o quanto esse procedimento rejuvenesce o olhar — e fico feliz que esteja pensando em cuidar das pálpebras!\n\nPara você:\n💳 *R$ 1.380,00 (pacote 3 sessões)*\n📆 *Parcelado: 6x de R$ 230,00*\n\nMe fala quando quiser agendar e eu já separo o seu horário com carinho. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nO eletrocautério para pálpebras é um procedimento técnico que exige precisão milimétrica em uma região extremamente delicada — o valor reflete esse cuidado.\n\nO pacote de 3 sessões por *R$ 1.380,00* parcelado em *6x de R$ 230,00* é bem acessível para o resultado que entrega! 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre o eletrocautério para pálpebras! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase fechada esse mês e lembrei que você tinha interesse no eletrocautério para pálpebras.\n\nUm olhar mais aberto e jovem — sem cirurgia. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! O lifting de pálpebras sem cirurgia é um dos resultados mais impactantes que vejo aqui — rejuvenescimento real sem bisturi. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse no eletrocautério para pálpebras ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"intradermo", nome:"Intradermoterapia Corporal", emoji:"🌿",
+    preco:"Sessão: R$ 290,00 · Pacote 4 sessões: R$ 1.040,00 · Parcelado: 6x de R$ 173,33",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando na intradermoterapia! É um tratamento injetável que age diretamente na gordura localizada, flacidez, celulite, melasma, cicatrizes e muito mais — com ativos personalizados para o seu caso.\n\nO resultado é progressivo e começa a aparecer já nas primeiras sessões. 🤍\n\nO investimento é:\n✨ *Sessão avulsa: R$ 290,00*\n💎 *Pacote 4 sessões: R$ 1.040,00* (economia de R$ 120,00)\n📆 *Parcelado: 6x de R$ 173,33*\n\nO pacote é sempre o mais indicado para resultados mais expressivos!\n\nQuer saber mais ou já agendamos sua avaliação? 🌸`,
+    msgFidelizada:`*[Nome], que bom!* 🌿😊\n\nVocê já conhece como a intradermoterapia funciona — e fico feliz que esteja pensando em continuar ou retomar o tratamento!\n\nPara você:\n✨ *Sessão avulsa: R$ 290,00*\n💎 *Pacote 4 sessões: R$ 1.040,00*\n📆 *Parcelado: 6x de R$ 173,33*\n\nSó me fala quando quiser agendar e eu já reservo o seu horário. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nA intradermoterapia utiliza ativos específicos para o seu caso, com técnica injetável que exige preparo e cuidado. O valor já é bastante acessível — e o *pacote de 4 sessões por R$ 1.040,00* parcelado em *6x de R$ 173,33* facilita ainda mais. 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a intradermoterapia corporal! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse na intradermoterapia corporal.\n\nResultados progressivos para gordura, flacidez e celulite com protocolo personalizado. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! A intradermoterapia é um dos tratamentos que mais gosto de personalizar para cada paciente — porque o resultado aparece de verdade. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na intradermoterapia corporal ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"pdrn", nome:"Estética Regenerativa", emoji:"🧬",
+    preco:"PDRN + Exossomos — Sessão: R$ 610,00 · Parcelado: 6x de R$ 101,67",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está conhecendo a Estética Regenerativa! Esse é um dos tratamentos mais inovadores que ofereço aqui na clínica — combina *PDRN (polinucleotídeos)* e *Exossomos*, duas tecnologias de ponta que atuam na regeneração celular profunda da pele.\n\nO resultado? Pele com mais viço, firmeza, uniformidade e uma qualidade completamente renovada — de dentro para fora. É o tratamento favorito de quem quer resultados reais e duradouros. 🤍\n\nO investimento é:\n💳 *À vista: R$ 610,00 por sessão*\n📆 *Parcelado: 6x de R$ 101,67*\n\nQuer saber mais sobre como funciona ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], que delícia receber sua mensagem!* 🧬😊\n\nVocê já sabe como a sua pele responde maravilhosamente bem aos tratamentos regenerativos — e a combinação de PDRN + Exossomos é simplesmente incrível para continuar elevando a qualidade da sua pele!\n\nPara você, minha paciente especial:\n💳 *À vista: R$ 610,00 por sessão*\n📆 *Parcelado: 6x de R$ 101,67*\n\nSó me fala quando quiser vir e eu já reservo o seu horário com todo carinho. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nA Estética Regenerativa com PDRN e Exossomos utiliza ativos biológicos de altíssima tecnologia — é literalmente o que há de mais avançado em regeneração celular na medicina estética hoje. O valor reflete a qualidade desses insumos e a técnica de aplicação.\n\nE para facilitar, pode ser parcelado em *6x de R$ 101,67* — menos de R$ 110,00 por mês para um tratamento de ponta. 🤍\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a Estética Regenerativa com PDRN e Exossomos! É um tratamento que adoro explicar porque os resultados são realmente fascinantes. Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse na Estética Regenerativa.\n\nPDRN + Exossomos é o que há de mais moderno em regeneração celular — e os resultados falam por si. 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! A Estética Regenerativa com PDRN e Exossomos é um dos tratamentos que mais me emociona oferecer — a transformação na qualidade da pele é real, profunda e progressiva. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na Estética Regenerativa ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"rino", nome:"Rinomodelação", emoji:"👃",
+    preco:"1ml ácido hialurônico — R$ 1.400,00 por seringa · Parcelado: 6x de R$ 233,33",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando na Rinomodelação! É um dos procedimentos mais transformadores da medicina estética — corrige imperfeições do nariz como dorso largo, ponta caída, assimetrias e desvios, usando ácido hialurônico de forma precisa e segura, sem cirurgia e sem recuperação longa.\n\nO resultado é imediato e natural, harmonizando o nariz com o restante do rosto. 🤍\n\nO investimento é *R$ 1.400,00 por seringa (1ml)*:\n💳 *À vista: R$ 1.400,00*\n📆 *Parcelado: 6x de R$ 233,33*\n\n*O número de seringas é definido na sua avaliação individual.*\n\nQuer saber mais ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], que bom receber sua mensagem!* 👃😊\n\nVocê já sabe como a Rinomodelação transforma a harmonia do rosto — e fico feliz que esteja pensando em renovar!\n\nPara você, minha paciente especial:\n💳 *À vista: R$ 1.400,00 por seringa*\n📆 *Parcelado: 6x de R$ 233,33*\n\nSó me fala quando quiser agendar e eu já reservo o seu horário com todo carinho. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nA Rinomodelação exige produto de alta qualidade, domínio técnico e um olhar estético muito apurado — a região do nariz é extremamente delicada e o resultado precisa ser perfeito. O valor reflete todo esse cuidado. 🤍\n\nO parcelamento em *6x de R$ 233,33* torna bem mais acessível sem comprometer nada.\n\nQue tal agendarmos sua avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a Rinomodelação! É um procedimento que adoro explicar — os resultados são incríveis e imediatos. Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase completa esse mês e lembrei que você tinha interesse na Rinomodelação.\n\nHarmonizar o nariz sem cirurgia é um dos resultados que mais encanta — e os resultados são imediatos! 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! A Rinomodelação é um dos procedimentos que mais me encanta oferecer — resultado imediato, natural e que transforma a harmonia do rosto inteiro sem bisturi. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na Rinomodelação ainda estiver por aí, pode me chamar. 🤍`
+  },
+  {
+    id:"papada", nome:"Intradermoterapia Papada", emoji:"✂️",
+    preco:"Sessão: R$ 490,00 · Pacote 3 sessões: R$ 1.260,00 · Parcelado: 6x de R$ 210,00",
+    msgPadrao:`*Olá, [nome]!* 😊\n\nQue ótimo que você está pensando na lipo de papada! A intradermoterapia para papada é um tratamento injetável que reduz a gordura localizada na região do mento e pescoço, definindo o contorno facial de forma progressiva — sem cirurgia e sem tempo de recuperação longo.\n\nAqui utilizo protocolo personalizado com ativos lipolíticos de alta qualidade. 🤍\n\nO investimento é:\n✨ *Sessão avulsa: R$ 490,00*\n💎 *Pacote 3 sessões: R$ 1.260,00* (economia de R$ 210,00)\n📆 *Parcelado: 6x de R$ 210,00*\n\nQuer saber mais ou já agendamos sua avaliação?\n\nTe espero! 🌸`,
+    msgFidelizada:`*[Nome], que bom te ver por aqui!* ✂️😊\n\nVocê já sabe como o contorno do rosto fica mais definido com o tratamento da papada — e fico feliz que queira continuar investindo em você!\n\nPara você:\n✨ *Sessão avulsa: R$ 490,00*\n💎 *Pacote 3 sessões: R$ 1.260,00*\n📆 *Parcelado: 6x de R$ 210,00*\n\nSó me fala quando quiser agendar e eu já cuido de tudo. 🤍💛`,
+    msgDesconto:`[Nome], entendo! 😊\n\nA intradermoterapia para papada utiliza ativos lipolíticos específicos aplicados com técnica precisa — o valor reflete qualidade e segurança.\n\nO *pacote de 3 sessões por R$ 1.260,00* já representa uma economia real, e pode ser parcelado em *6x de R$ 210,00*. 🤍\n\nQue tal agendarmos uma avaliação? 🌸`,
+    msgSumiu_A:`*Oi, [nome]!* 😊\n\nSó passando para ver se ficou alguma dúvida sobre a lipo de papada! Se quiser conversar mais, estou aqui. 🤍`,
+    msgSumiu_B:`*Oi, [nome], tudo bem?* 🌸\n\nMinha agenda está quase fechada esse mês e lembrei que você tinha interesse na intradermoterapia para papada.\n\nContorno facial definido sem cirurgia — o resultado faz toda a diferença! 🤍 Se quiser garantir seu horário, é só me falar! 😊`,
+    msgSilencio:`*[Nome], tudo bem?* 💛\n\nÚltima mensagem! A lipo de papada é um dos tratamentos que mais define o contorno facial — resultado real, sem bisturi. ✨\n\nQuando quiser, a agenda está aberta. 🌸`,
+    msgReativacao:`*Oi, [nome]!* 🌸\n\nFaz um tempinho que conversamos! Abriram horários novos essa semana — se o interesse na lipo de papada ainda estiver por aí, pode me chamar. 🤍`
+  }
+];
+
+// Montar array final com etapas
+const procedimentos = procRaw.map(p => ({
+  ...p,
+  etapas: [
+    { num:"01", titulo:"Primeira resposta — Apresentar valor antes do preço", quando:"Quando a paciente pergunta o preço",
+      mensagens:[
+        { label:"Versão padrão", fid:false, texto:p.msgPadrao },
+        { label:"💚 Versão para paciente fidelizada", fid:true, texto:p.msgFidelizada }
+      ]
+    },
+    { num:"02", titulo:"Paciente pede desconto", quando:"Quando ela questiona o valor", mensagens:[{ label:null, fid:false, texto:p.msgDesconto }] },
+    { num:"03", titulo:"Paciente sumiu após ver o preço", quando:"1º follow-up — após 2 a 3 dias sem resposta",
+      mensagens:[
+        { label:"Versão A — Leve e curiosa", fid:false, texto:p.msgSumiu_A },
+        { label:"Versão B — Urgência suave", fid:false, texto:p.msgSumiu_B }
+      ]
+    },
+    { num:"04", titulo:"Paciente ainda não respondeu", quando:"2º follow-up — após mais 3 a 5 dias", mensagens:[{ label:null, fid:false, texto:p.msgSilencio }] },
+    { num:"05", titulo:"Reativação futura", quando:"Após 2 a 4 semanas", mensagens:[{ label:null, fid:false, texto:p.msgReativacao }] }
+  ]
+}));
+
+// ─── LEMBRETES ────────────────────────────────────────────
+const lembretes = [
+  { id:"bot", nome:"Toxina Botulínica", emoji:"✨", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nPassando para confirmar sua *Toxina Botulínica* amanhã, [dia] às [horário]! 🌸\n\n✅ Não use álcool no dia anterior\n✅ Evite anti-inflamatórios\n✅ Venha com o rosto limpo, sem maquiagem\n\nQualquer dúvida, pode me chamar. Te espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é o dia da sua *Toxina Botulínica*! 🎉\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nEm caso de imprevisto, me avise com antecedência. 🌸 Te espero com tudo pronto! 💛` }
+  ]},
+  { id:"olh", nome:"Preench. Olheiras", emoji:"👁", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nPassando para confirmar seu *Preenchimento de Olheiras* amanhã, [dia] às [horário]! 🌸\n\n✅ Hidrate-se bem\n✅ Evite anti-inflamatórios\n✅ Se tiver histórico de herpes, me avise!\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é o dia do seu *Preenchimento de Olheiras*! ✨\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nVenha com o rosto limpo e sem maquiagem. 🌸 Te espero! 💛` }
+  ]},
+  { id:"lab", nome:"Preench. Labial", emoji:"💋", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Preenchimento Labial*! [dia] às [horário]. 🌸\n\n✅ Evite anti-inflamatórios\n✅ Se tiver histórico de herpes labial, me avise!\n✅ Hidrate-se bem\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é o dia dos seus *Lábios Novos*! 💋\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nVenha com rosto limpo e sem batom. 🌸 Te espero! 💛` }
+  ]},
+  { id:"mic", nome:"Microagulhamento", emoji:"🔬", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Microagulhamento*! [dia] às [horário]. 🌸\n\n✅ Sem retinol, ácidos ou esfoliantes por 3 dias antes\n✅ Evite sol excessivo\n✅ Sem anti-inflamatórios\n✅ Rosto limpo, sem maquiagem\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia de *Microagulhamento*! 🔬\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRosto limpo, sem maquiagem e sem cremes. 🌸 Te espero! 💛` }
+  ]},
+  { id:"escl", nome:"Escleroterapia", emoji:"🩺", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Escleroterapia*! [dia] às [horário]. 🌸\n\n✅ Roupas confortáveis e folgadas\n✅ Sem anti-inflamatórios\n✅ Sem depilação nas pernas nos últimos 3 dias\n✅ Sem hidratante nas pernas no dia\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia de *Escleroterapia*! 🩺\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRoupa confortável e sem hidratante nas pernas. 🌸 Te espero! 💛` }
+  ]},
+  { id:"glu", nome:"Harmoniz. Glúteos", emoji:"✦", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Harmonização de Glúteos*! [dia] às [horário]. 🌸\n\n✅ Roupa confortável e folgada\n✅ Sem anti-inflamatórios\n✅ Hidrate-se bem\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje começa sua transformação com o *GluteoMax*! ✦\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRoupa confortável. 🌸 Te espero! 💛` }
+  ]},
+  { id:"bio", nome:"Bioestimulador", emoji:"💎", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Bioestimulador de Colágeno*! [dia] às [horário]. 🌸\n\n✅ Sem anti-inflamatórios por 5 dias antes\n✅ Sem álcool no dia anterior\n✅ Área limpa, sem maquiagem ou cremes\n✅ Hidrate-se bem\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia do seu *Bioestimulador de Colágeno*! 💎\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nÁrea limpa, sem maquiagem ou cremes. 🌸 Te espero! 💛` }
+  ]},
+  { id:"skin", nome:"Skinbooster", emoji:"💧", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Skinbooster*! [dia] às [horário]. 🌸\n\n✅ Hidrate-se bem\n✅ Sem anti-inflamatórios\n✅ Venha com o rosto limpo, sem maquiagem\n✅ Evite sol excessivo nos dias anteriores\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia de *Skinbooster*! 💧\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRosto limpo, sem maquiagem. 🌸 Te espero! 💛` }
+  ]},
+  { id:"ele", nome:"Eletrocautério Pálpebras", emoji:"👀", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia do *Eletrocautério de Pálpebras*! [dia] às [horário]. 🌸\n\n✅ Venha sem maquiagem nos olhos\n✅ Sem anti-inflamatórios\n✅ Evite sol na região nos dias anteriores\n✅ Se usar lentes de contato, tire antes do procedimento\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia do *Eletrocautério de Pálpebras*! 👀\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nSem maquiagem nos olhos e sem lentes de contato. 🌸 Te espero! 💛` }
+  ]},
+  { id:"int", nome:"Intradermoterapia Corporal", emoji:"🌿", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Intradermoterapia Corporal*! [dia] às [horário]. 🌸\n\n✅ Roupa confortável e folgada\n✅ Sem anti-inflamatórios\n✅ Hidrate-se bem\n✅ Sem hidratante na área a ser tratada no dia\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia de *Intradermoterapia Corporal*! 🌿\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRoupa confortável e sem hidratante na área. 🌸 Te espero! 💛` }
+  ]},
+  { id:"pdrn", nome:"Estética Regenerativa", emoji:"🧬", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Estética Regenerativa (PDRN + Exossomos)*! [dia] às [horário]. 🌸\n\n✅ Venha com o rosto limpo, sem maquiagem\n✅ Sem retinol ou ácidos por 3 dias antes\n✅ Evite anti-inflamatórios\n✅ Hidrate-se bem\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia de *Estética Regenerativa*! 🧬\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRosto limpo, sem maquiagem e sem cremes. 🌸 Te espero! 💛` }
+  ]},
+  { id:"rino", nome:"Rinomodelação", emoji:"👃", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia de *Rinomodelação*! [dia] às [horário]. 🌸\n\n✅ Venha com o rosto limpo, sem maquiagem\n✅ Sem anti-inflamatórios\n✅ Hidrate-se bem\n✅ Se tiver histórico de herpes, me avise!\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia da sua *Rinomodelação*! 👃\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nRosto limpo, sem maquiagem. 🌸 Te espero! 💛` }
+  ]},
+  { id:"pap", nome:"Intradermoterapia Papada", emoji:"✂️", msgs:[
+    { titulo:"1 dia antes", quando:"Enviar na véspera", texto:`*Oi, [nome]!* 😊\n\nAmanhã é dia da *Lipo de Papada*! [dia] às [horário]. 🌸\n\n✅ Venha com o pescoço/queixo limpo, sem cremes\n✅ Sem anti-inflamatórios\n✅ Hidrate-se bem\n✅ Roupa confortável e de gola baixa\n\nTe espero! 💛` },
+    { titulo:"No dia — manhã", quando:"Enviar na manhã do procedimento", texto:`*Bom dia, [nome]!* ☀️\n\nHoje é dia da *Lipo de Papada*! ✂️\n\n⏰ Horário: [horário]\n📍 Endereço: [endereço]\n\nPescoço limpo, sem cremes e roupa de gola baixa. 🌸 Te espero! 💛` }
+  ]}
+];
+
+// ─── PÓS-PROCEDIMENTO ─────────────────────────────────────
+const posProcedimentos = [
+  { id:"pbot", nome:"Toxina Botulínica", emoji:"✨",
+    cuidados:[
+      { titulo:"Primeiras 4 horas", itens:["Não deite nem se incline para frente","Não massageie a área","Sem exercícios físicos","Sem capacete ou faixa na cabeça"] },
+      { titulo:"24-48 horas", itens:["Sem sauna, banho muito quente ou sol forte","Sem álcool","Sem massagem facial ou laser na área"] },
+      { titulo:"14 dias", itens:["Resultado completo entre 7 e 14 dias","Assimetrias leves podem ser ajustadas na revisão","FPS 50+ todos os dias","Sem anti-inflamatórios sem orientação"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], você foi incrível!* 🌸\n\nSua *Toxina Botulínica* foi concluída! Agora é cuidar nas próximas horas. 🤍\n\n⚠️ Não deite por 4 horas\n⚠️ Não massageie a área\n⚠️ Sem exercícios hoje\n⚠️ Sem sauna ou sol intenso por 24h\n\nO resultado aparece em 3-7 dias e fica completo em 14 dias. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Revisão (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nFaz uma semana da sua Toxina Botulínica! Já está notando o resultado? 🌸\n\nLembre-se: o efeito completo aparece até o *14º dia*. Se sentir alguma assimetria, me fala que agendamos sua revisão! 💛` }
+    ]
+  },
+  { id:"polh", nome:"Preench. Olheiras", emoji:"👁",
+    cuidados:[
+      { titulo:"24 horas", itens:["Sem massagem na região","Sem pressão ao redor dos olhos","Durma com cabeça levemente elevada","Sem maquiagem na área"] },
+      { titulo:"1 semana", itens:["FPS 50+ todos os dias","Nódulos ou irregularidades leves são normais","Sem sauna ou banho muito quente"] },
+      { titulo:"Observações", itens:["Hematomas leves são normais e passam em dias","Resultado estabiliza em 2-4 semanas","Em caso de dúvida, mande foto para avaliação"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], ficou lindo!* 👁✨\n\nSeu *Preenchimento de Olheiras* foi concluído! 🤍\n\n⚠️ Não massageie a região\n⚠️ Sem maquiagem hoje\n⚠️ Durma com a cabeça levemente elevada\n⚠️ Evite sol direto na área\n\nPequeno inchaço é normal e passa em dias. Qualquer dúvida, manda mensagem! 💛` },
+      { titulo:"Acompanhamento (3 dias)", quando:"Enviar após 3 dias", texto:`*Oi, [nome]!* 🌸\n\nPassando para saber como está o resultado do Preenchimento de Olheiras! O inchaço já deu uma boa reduzida?\n\nSe quiser me mandar uma foto, pode ficar à vontade! 💛` }
+    ]
+  },
+  { id:"plab", nome:"Preench. Labial", emoji:"💋",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Não massageie os lábios","Evite beijos com pressão","Sem batom ou produtos labiais","Sem alimentos muito quentes ou gelados","Sem canudo"] },
+      { titulo:"1 semana", itens:["Inchaço e leve assimetria são normais","Resultado real aparece após 2 semanas","FPS labial todos os dias"] },
+      { titulo:"Observações", itens:["Se tiver histórico de herpes, use antiviral prescrito","Nódulos ou dúvidas: entre em contato"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], amei o resultado!* 💋🌸\n\nSeu *Preenchimento Labial* foi concluído! 🤍\n\n⚠️ Não massageie os lábios\n⚠️ Sem batom hoje\n⚠️ Sem alimentos muito quentes ou gelados\n⚠️ Sem canudo por 24h\n\nO inchaço é normal e passa! Resultado real em 2 semanas. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (3 dias)", quando:"Enviar após 3 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como estão os seus lábios! O inchaço já deu uma reduzida? 🌸\n\nSe quiser me mandar uma foto, fico feliz em ver! 💛` }
+    ]
+  },
+  { id:"pmic", nome:"Microagulhamento", emoji:"🔬",
+    cuidados:[
+      { titulo:"24 horas", itens:["Não lave o rosto por 6 horas","Sem maquiagem","Sem academia ou atividades com suor","Use apenas os produtos indicados"] },
+      { titulo:"1 semana", itens:["Sem ácidos, retinol ou esfoliantes","FPS 50+ obrigatório todos os dias","Pele vermelha ou ressecada é normal","Hidrate com produtos suaves","Não extraia nada na pele"] },
+      { titulo:"30 dias", itens:["Resultado melhora progressivamente a cada sessão","Respeite o intervalo entre sessões (3-4 semanas)","Protetor solar todos os dias — sem exceção!"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], sua pele vai agradecer!* 🔬✨\n\nSeu *Microagulhamento* foi concluído! A pele está em processo de regeneração — respeite os cuidados. 🤍\n\n⚠️ Não lave o rosto por 6 horas\n⚠️ Sem maquiagem hoje\n⚠️ Sem academia nem suor\n⚠️ Use só os produtos que indiquei\n⚠️ FPS 50+ a partir de amanhã, todos os dias\n\nQualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está a sua pele após o Microagulhamento! Já notou alguma melhora na textura? 🌸\n\nSe quiser me mandar uma foto, fico feliz em acompanhar o resultado! 💛` }
+    ]
+  },
+  { id:"pesc", nome:"Escleroterapia", emoji:"🩺",
+    cuidados:[
+      { titulo:"48 horas", itens:["Use a meia de compressão conforme orientado","Sem sol nas pernas","Sem atividade física intensa","Sem banho quente, sauna ou jacuzzi","Evite ficar muito tempo parada"] },
+      { titulo:"1 semana", itens:["Os vasinhos podem escurecer antes de sumir — é normal!","Continue com a meia de compressão","Sem depilação na área tratada"] },
+      { titulo:"Observações", itens:["Resultado final progressivo: 4 a 8 semanas","Novas sessões podem ser necessárias","Em caso de dor intensa ou inflamação, entre em contato imediatamente"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], ótimo!* 🩺🌸\n\nSua *Escleroterapia* foi concluída! 🤍\n\n⚠️ Use a meia de compressão\n⚠️ Sem sol nas pernas\n⚠️ Sem academia hoje\n⚠️ Sem banho quente ou sauna\n\nOs vasinhos podem escurecer antes de sumir — é parte do processo! Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (10 dias)", quando:"Enviar após 10 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como estão as pernas após a Escleroterapia! Já notou alguma melhora? 🌸\n\nO resultado é progressivo — vai ficando cada vez melhor. Se quiser me mandar uma foto, fico feliz em acompanhar! 💛` }
+    ]
+  },
+  { id:"pglu", nome:"Harmoniz. Glúteos", emoji:"✦",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Evite sentar diretamente na área por longos períodos","Sem atividade física intensa","Sem massagem na região","Sem banho muito quente ou sauna"] },
+      { titulo:"1 semana", itens:["Nódulos ou endurecimento leve são normais","Sem pressão excessiva na região","Roupas confortáveis e folgadas","Hidrate-se bem"] },
+      { titulo:"Observações", itens:["Resultado progressivo a cada sessão","Respeite o intervalo entre sessões","Em caso de dor fora do normal, entre em contato"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], primeira sessão concluída!* ✦🌸\n\nSeu *GluteoMax* começou! O resultado aparece progressivamente. 🤍\n\n⚠️ Evite sentar por longos períodos nas primeiras horas\n⚠️ Sem academia hoje\n⚠️ Sem massagem na área\n⚠️ Roupas confortáveis\n\nQualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como você está após a sessão do GluteoMax! Já sentiu alguma diferença? 🌸\n\nMe conta! E quando quiser agendar a próxima, é só chamar. 💛` }
+    ]
+  },
+  { id:"pbio", nome:"Bioestimulador", emoji:"💎",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Não massageie a área","Sem atividade física intensa","Sem maquiagem na área","Sem sol direto","Sem anti-inflamatórios"] },
+      { titulo:"1 semana", itens:["Faça a automassagem conforme orientado","FPS 50+ todos os dias","Hidrate bem a pele"] },
+      { titulo:"Próximos meses", itens:["Resultado PROGRESSIVO: melhora ao longo de 3-6 meses","Retorno recomendado em 30-60 dias","Manutenção geralmente anual"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], investimento feito!* 💎🌸\n\nSeu *Bioestimulador de Colágeno* foi aplicado! Agora o seu corpo começa a trabalhar para produzir colágeno naturalmente. 🤍\n\n⚠️ Não massageie a área\n⚠️ Sem maquiagem hoje na área\n⚠️ Sem academia\n⚠️ FPS 50+ a partir de amanhã, todos os dias\n\nFaça a automassagem conforme te orientei. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (30 dias)", quando:"Enviar após 30 dias", texto:`*Oi, [nome]!* 😊\n\nFaz um mês do seu Bioestimulador! Já notou alguma diferença na firmeza da pele? 🌸\n\nO resultado continua evoluindo nos próximos meses — é uma transformação progressiva e maravilhosa. Se quiser me mandar uma foto, fico feliz em acompanhar! 💛` }
+    ]
+  },
+  { id:"pski", nome:"Skinbooster", emoji:"💧",
+    cuidados:[
+      { titulo:"24 horas", itens:["Não lave o rosto por 6 horas","Sem maquiagem","Use apenas os produtos indicados","Sem academia ou atividades com suor"] },
+      { titulo:"1 semana", itens:["FPS 50+ todos os dias — obrigatório","Hidrate bem a pele","Pequenos nódulos ou inchaço leve são normais e passam em dias","Sem esfoliantes ou ácidos"] },
+      { titulo:"Observações", itens:["O brilho e hidratação aparecem progressivamente","Protocolo habitual: 3 sessões com intervalo de 30 dias","Manutenção semestral ou anual"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], sua pele vai brilhar!* 💧✨\n\nSeu *Skinbooster* foi aplicado! 🤍\n\n⚠️ Não lave o rosto por 6 horas\n⚠️ Sem maquiagem hoje\n⚠️ Sem academia\n⚠️ FPS 50+ a partir de amanhã\n\nO viço e a hidratação aparecem progressivamente. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está a pele após o Skinbooster! Já notou o brilho e a maciez? 🌸\n\nMe conta! E se quiser me mandar uma foto, fico feliz em ver a evolução. 💛` }
+    ]
+  },
+  { id:"pele", nome:"Eletrocautério Pálpebras", emoji:"👀",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Não friccione a área","Sem maquiagem nos olhos","Sem lentes de contato","Evite sol direto na região","Não use cremes ou séruns na área sem orientação"] },
+      { titulo:"1 semana", itens:["FPS 50+ todos os dias","Pequenas crostas são normais — não remova forçadamente","Hidrate com produto específico conforme orientado","Evite piscina, sauna e banho muito quente"] },
+      { titulo:"Observações", itens:["O resultado final aparece após cicatrização completa (2-4 semanas)","Em caso de vermelhidão intensa ou dúvida, entre em contato","Proteção solar é essencial para o resultado durar"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], olhar renovado!* 👀🌸\n\nSeu *Eletrocautério de Pálpebras* foi concluído! 🤍\n\n⚠️ Sem maquiagem nos olhos\n⚠️ Sem lentes de contato hoje\n⚠️ Não friccione a área\n⚠️ Evite sol direto\n\nPequenas crostas são normais — não remova. FPS 50+ a partir de amanhã. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (10 dias)", quando:"Enviar após 10 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está se sentindo após o Eletrocautério de Pálpebras! Já está notando a diferença no olhar? 🌸\n\nSe quiser me mandar uma foto, fico feliz em acompanhar a cicatrização! 💛` }
+    ]
+  },
+  { id:"pint", nome:"Intradermoterapia Corporal", emoji:"🌿",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Sem academia ou atividades intensas","Não esfregue a área tratada","Evite banho muito quente ou sauna","Sem anti-inflamatórios sem orientação"] },
+      { titulo:"1 semana", itens:["Hidrate-se bem — é fundamental para o resultado","Evite sol direto na área tratada","FPS 50+ se área exposta","Use roupas confortáveis e folgadas"] },
+      { titulo:"Observações", itens:["Resultado progressivo a cada sessão","Respeite o intervalo entre sessões","Pequenos nódulos ou hematomas são normais e passam em dias"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], mais uma etapa concluída!* 🌿🌸\n\nSua *Intradermoterapia Corporal* foi aplicada! 🤍\n\n⚠️ Sem academia hoje\n⚠️ Sem banho quente ou sauna\n⚠️ Hidrate-se bem\n⚠️ Roupas confortáveis\n\nO resultado é progressivo — cada sessão potencializa a anterior. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (10 dias)", quando:"Enviar após 10 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está se sentindo após a Intradermoterapia! Já notou alguma diferença? 🌸\n\nMe conta! E quando quiser agendar a próxima sessão, é só me chamar. 💛` }
+    ]
+  },
+  { id:"ppdrn", nome:"Estética Regenerativa", emoji:"🧬",
+    cuidados:[
+      { titulo:"24 horas", itens:["Não lave o rosto por 6 horas","Sem maquiagem","Sem academia ou atividades com suor","Use apenas os produtos indicados","Não toque desnecessariamente na área"] },
+      { titulo:"1 semana", itens:["FPS 50+ todos os dias — obrigatório","Sem retinol, ácidos ou esfoliantes","Hidrate com produtos suaves","Sem sauna ou banho muito quente","Não extraia nada na pele"] },
+      { titulo:"Observações", itens:["O resultado é progressivo e se aprofunda ao longo das semanas","Pele pode ficar levemente avermelhada — é normal e passa em horas","Protocolo habitual: 3-4 sessões com intervalo de 21-30 dias","Para melhores resultados, evite exposição solar sem proteção"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], sua pele entrou em modo regeneração!* 🧬✨\n\nSua *Estética Regenerativa (PDRN + Exossomos)* foi concluída! 🤍\n\n⚠️ Não lave o rosto por 6 horas\n⚠️ Sem maquiagem hoje\n⚠️ Sem academia\n⚠️ FPS 50+ a partir de amanhã, todos os dias\n\nA regeneração celular começa agora e se intensifica nas próximas semanas. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está a sua pele após a Estética Regenerativa! Já notou alguma diferença no viço e na textura? 🌸\n\nO resultado continua evoluindo — cada dia um pouco mais. Se quiser me mandar uma foto, fico feliz em acompanhar! 💛` }
+    ]
+  },
+  { id:"prino", nome:"Rinomodelação", emoji:"👃",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Não massageie o nariz","Não aperte ou friccione a região","Evite óculos por pelo menos 2 semanas (especialmente pesados)","Sem maquiagem na área","Durma de barriga para cima, sem pressionar o nariz"] },
+      { titulo:"1 semana", itens:["Evite exposição solar direta no nariz","FPS 50+ todos os dias","Sem sauna, banho muito quente ou atividades intensas","Sem procedimentos estéticos na área","Pequeno inchaço ou hematoma são normais e passam em dias"] },
+      { titulo:"Observações", itens:["Resultado imediato mas estabiliza completamente em 2 semanas","Em caso de dúvida, envie foto para avaliação","Não faça pressão sobre o nariz em nenhum momento","Se usar óculos, prefira os de hastes (não apoiam no nariz)"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], ficou incrível!* 👃🌸\n\nSua *Rinomodelação* foi concluída! 🤍\n\n⚠️ Não massageie o nariz\n⚠️ Sem óculos por 2 semanas\n⚠️ Sem maquiagem hoje\n⚠️ Durma de barriga para cima\n\nPequeno inchaço é normal e passa em dias. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (7 dias)", quando:"Enviar após 7 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está o resultado da Rinomodelação! O inchaço já reduziu bastante? 🌸\n\nSe quiser me mandar uma foto, fico feliz em acompanhar! 💛` }
+    ]
+  },
+  { id:"ppap", nome:"Intradermoterapia Papada", emoji:"✂️",
+    cuidados:[
+      { titulo:"24-48 horas", itens:["Inchaço e vermelhidão leve na região são normais","Evite movimentos excessivos do pescoço","Sem academia ou atividades intensas","Sem banho muito quente ou sauna","Sem anti-inflamatórios sem orientação"] },
+      { titulo:"1 semana", itens:["Hidrate-se bem","Evite sol direto na região","Use roupas de gola baixa para não pressionar a área","Sem massagem na área"] },
+      { titulo:"Observações", itens:["O resultado de definição do contorno é progressivo","Respeite o intervalo entre sessões","Em caso de inchaço excessivo ou dor intensa, entre em contato"] }
+    ],
+    msgs:[
+      { titulo:"Pós imediato", quando:"Enviar logo após o procedimento", texto:`*[Nome], contorno em processo!* ✂️🌸\n\nSua *Lipo de Papada* foi aplicada! 🤍\n\n⚠️ Inchaço leve é normal — não se preocupe\n⚠️ Sem academia hoje\n⚠️ Sem banho quente ou sauna\n⚠️ Hidrate-se bem\n\nO resultado aparece progressivamente ao longo das sessões. Qualquer dúvida, pode me chamar! 💛` },
+      { titulo:"Acompanhamento (10 dias)", quando:"Enviar após 10 dias", texto:`*Oi, [nome]!* 😊\n\nPassando para saber como está a região da papada após o tratamento! O inchaço já reduziu bastante? 🌸\n\nSe quiser me mandar uma foto, fico feliz em acompanhar a evolução! 💛` }
+    ]
+  }
+];
+
+// ─── RESGATE ──────────────────────────────────────────────
+const resgateData = {
+  fizeram:{ titulo:"Pacientes que fizeram e sumiram", emoji:"🌿", grupos:[
+    { nome:"Resgate 30-60 dias", msgs:[
+      { titulo:"Versão 1 — Saudade + novo contato", texto:`*Oi, [nome], tudo bem?* 🌸\n\nFaz um tempinho que não tenho notícias de você e fiquei querendo saber como está!\n\nComo foi o resultado do seu procedimento? Já pensou no próximo passo do seu tratamento?\n\nEstou aqui sempre que precisar! 💛` },
+      { titulo:"Versão 2 — Novidade na clínica", texto:`*Oi, [nome]!* 😊\n\nPassando para te dar um oi e contar que temos novidades na clínica! [Novidade ou promoção].\n\nLembrei de você na hora e quis te avisar. Caso queira saber mais ou já agendar, é só me chamar! 🌸` }
+    ]},
+    { nome:"Manutenção (3-6 meses)", msgs:[
+      { titulo:"Lembrete de manutenção", texto:`*Oi, [nome]!* 🌸\n\nPassando para lembrar que já está na hora da sua *manutenção*! Os resultados se prolongam muito mais com os retornos regulares. 🤍\n\nMinha agenda tem horários disponíveis essa semana. Que tal agendarmos o seu? 😊` },
+      { titulo:"Manutenção com urgência suave", texto:`*Oi, [nome], tudo bem?* 💛\n\nFaz alguns meses desde o seu procedimento — esse é o momento ideal para a manutenção e garantir que o resultado se mantenha lindo!\n\nMinha agenda está quase fechando para esse mês. Se quiser garantir seu horário, é só me falar! 🌸` }
+    ]}
+  ]},
+  leads:{ titulo:"Leads que nunca agendaram", emoji:"💬", grupos:[
+    { nome:"1ª tentativa — após 1 semana de silêncio", msgs:[
+      { titulo:"Versão suave", texto:`*Oi, [nome]!* 😊\n\nPassando para ver se ficou alguma dúvida em aberto ou se posso te ajudar com mais alguma informação.\n\nSaber mais antes de agendar é super válido — estou aqui para isso! 🤍` },
+      { titulo:"Com oferta de avaliação", texto:`*Oi, [nome]!* 🌸\n\nQueria te contar que ofereço *avaliação gratuita* — assim você me conhece, tira todas as dúvidas e só decide se fizer sentido para você.\n\nSem compromisso nenhum! Quer que eu verifique um horário disponível? 😊` }
+    ]},
+    { nome:"2ª tentativa — após 2-3 semanas", msgs:[
+      { titulo:"Última tentativa — carinhosa", texto:`*Oi, [nome]!* 💛\n\nSei que a vida é corrida e às vezes a gente adia o autocuidado… mas queria te dar um nudge carinhoso! 😊\n\nO cuidado com você mesma é um investimento que vale sempre. Quando estiver pronta, é só me chamar — a agenda está aberta. 🌸` }
+    ]}
+  ]},
+  genericas:{ titulo:"Mensagens Genéricas de Resgate", emoji:"✨", grupos:[
+    { nome:"Autocuidado & motivação", msgs:[
+      { titulo:"Você merece se cuidar", texto:`*Oi, [nome]!* 🌸\n\nPassando só para te dar um oi e lembrar que cuidar de você mesma não é luxo — é necessidade. 💛\n\nSempre que sentir que está na hora de se mimar um pouco, a clínica está aqui para te receber com todo carinho.\n\nQualquer dúvida ou vontade, é só me chamar! 😊` },
+      { titulo:"Você está em falta com você mesma", texto:`*Oi, [nome], tudo bem?* 😊\n\nSei que a rotina é corrida e a gente vai empurrando o autocuidado para depois…\n\nMas vim aqui te lembrar: você merece se sentir bem, bonita e cuidada. E isso começa com um agendamento! 🌸\n\nEstou aqui quando você quiser. 💛` }
+    ]},
+    { nome:"Datas especiais", msgs:[
+      { titulo:"Aniversário da paciente", texto:`*Feliz aniversário, [nome]!* 🎂🌸\n\nQue esse novo ano da sua vida seja cheio de saúde, alegria e muito autocuidado!\n\nComo presente especial para você, tenho [benefício/desconto/brinde] esperando por aí. 🎁\n\nVenha comemorar com a gente! 💛` },
+      { titulo:"Datas comemorativas (Dia das Mães, etc.)", texto:`*[Nome], feliz [data]!* 🌸\n\nEssa data é tão especial — e você merece celebrá-la se sentindo incrível!\n\nSe quiser se presentear ou presentear alguém especial com um procedimento, estou aqui para te ajudar a escolher o melhor. 💛\n\nMe chama! 😊` }
+    ]},
+    { nome:"Novidade ou promoção na clínica", msgs:[
+      { titulo:"Lançamento de novo procedimento", texto:`*Oi, [nome]!* ✨\n\nPassando para te contar uma novidade que acabou de chegar na clínica: *[nome do procedimento]!*\n\nJá pensei em você quando vi os resultados — acho que tem tudo a ver com o que você busca. 🌸\n\nQuer saber mais? Me chama que te conto tudo! 💛` },
+      { titulo:"Agenda com horários disponíveis", texto:`*Oi, [nome]!* 😊\n\nMinha agenda abriu alguns horários essa semana e lembrei de você!\n\nSe estiver com algum procedimento em mente ou quiser uma avaliação, esse pode ser o momento perfeito. 🌸\n\nMe fala se quiser encaixar um horário! 💛` },
+      { titulo:"Promoção ou condição especial", texto:`*Oi, [nome], tudo bem?* 🌸\n\nPassando para te avisar sobre uma condição especial que estou oferecendo essa semana: *[descreva a promoção]*.\n\nLembrei de você na hora e quis te avisar antes de divulgar para todo mundo! 😊\n\nSe quiser aproveitar, me fala logo — as vagas são limitadas. 💛` }
+    ]},
+    { nome:"Reengajamento suave", msgs:[
+      { titulo:"Faz tempo que não te vejo", texto:`*Oi, [nome]!* 💛\n\nFaz um tempinho que a gente não se fala e senti sua falta!\n\nComo você está? Espero que bem e se cuidando muito. 🌸\n\nSempre que precisar de mim, pode contar — estou aqui com a agenda aberta para te receber! 😊` },
+      { titulo:"Check-in sem pressão", texto:`*Oi, [nome]!* 🌸\n\nPassando só para dar um oi e saber como você está!\n\nSem pressão nenhuma — só queria que você soubesse que quando estiver pronta para se cuidar, a clínica está aqui esperando com muito carinho. 🤍\n\nCuide-se! 💛` },
+      { titulo:"Convite para avaliação gratuita", texto:`*Oi, [nome]!* 😊\n\nFaz um tempo que não conversamos — e queria te fazer um convite especial: venha fazer uma *avaliação gratuita* aqui na clínica!\n\nSem compromisso. Só para você me conhecer melhor, tirar dúvidas e ver o que podemos fazer por você. 🌸\n\nTe espero! 💛` }
+    ]}
+  ]},
+  retorno:{ titulo:"Pacientes com retorno em atraso", emoji:"⏰", grupos:[
+    { nome:"Retorno atrasado — lembrete gentil", msgs:[
+      { titulo:"Lembrete de retorno", texto:`*Oi, [nome]!* 😊\n\nPassando para lembrar que o seu *retorno* já está no prazo recomendado! O acompanhamento é parte essencial do tratamento — é ele que garante o melhor resultado. 🤍\n\nMinha agenda tem horários disponíveis. Quer que eu te encaixe? 💛` },
+      { titulo:"Retorno + novidade", texto:`*Oi, [nome], tudo bem?* 🌸\n\nLembrei de você porque o prazo do seu retorno já chegou!\n\nAlém do acompanhamento, tenho algumas novidades que quero te contar na consulta — acho que você vai amar. 😊\n\nQue tal já agendarmos? 💛` }
+    ]},
+    { nome:"Retorno muito atrasado (meses)", msgs:[
+      { titulo:"Resgate com preocupação genuína", texto:`*Oi, [nome]!* 💛\n\nFaz um bom tempo que não tenho notícias de você e fiquei com saudades!\n\nComo você está? Como está o resultado do seu tratamento?\n\nSempre que quiser retomar, estou aqui — sem julgamento, apenas cuidado. 🌸` }
+    ]}
+  ]}
+};
+
+// ─── RENDER CAPTAÇÃO ──────────────────────────────────────
+const navCaptacao = document.getElementById('nav-captacao');
+const painelCaptacao = document.getElementById('painel-captacao');
+
+procedimentos.forEach((proc, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'subnav-btn'+(i===0?' active':'');
+  btn.textContent = proc.emoji+' '+proc.nome;
+  btn.onclick = () => {
+    navCaptacao.querySelectorAll('.subnav-btn').forEach(b=>b.classList.remove('active'));
+    painelCaptacao.querySelectorAll('.procedimento').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cap-'+proc.id).classList.add('active');
+    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  };
+  navCaptacao.appendChild(btn);
+
+  const div = document.createElement('div');
+  div.className = 'procedimento'+(i===0?' active':'');
+  div.id = 'cap-'+proc.id;
+
+  let html = `<div class="proc-title">${proc.emoji} ${proc.nome}</div><div class="proc-preco">${proc.preco}</div>`;
+  proc.etapas.forEach((etapa, ei) => {
+    if(ei>0) html += `<div class="divisor"><div class="divisor-line"></div><div class="divisor-icon">✦</div><div class="divisor-line"></div></div>`;
+    html += `<div class="etapa"><div class="etapa-header"><div class="etapa-num">${etapa.num}</div><div class="etapa-info"><div class="etapa-titulo">${etapa.titulo}</div><div class="etapa-quando">${etapa.quando}</div></div></div>`;
+    etapa.mensagens.forEach((msg, mi) => {
+      const id = `cap-${proc.id}-${ei}-${mi}`;
+      if(msg.label){
+        const isFid = msg.fid;
+        html += `<div class="variante-label${isFid?' fid':''}">${msg.label}${isFid?'<span class="fid-badge">fidelizada</span>':''}</div>`;
+      }
+      html += `<div class="wpp-bubble${msg.fid?' fidelizada':''}" id="${id}">${esc(msg.texto)}<div class="wpp-time">✓✓</div></div><button class="copy-btn" onclick="copiar(this,'${id}')">Copiar mensagem</button>`;
+    });
+    html += `</div>`;
+  });
+  div.innerHTML = html;
+  painelCaptacao.appendChild(div);
+});
+
+// ─── RENDER LEMBRETES ─────────────────────────────────────
+const navLembretes = document.getElementById('nav-lembretes');
+const painelLembretes = document.getElementById('painel-lembretes');
+lembretes.forEach((proc, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'subnav-btn'+(i===0?' active':'');
+  btn.textContent = proc.emoji+' '+proc.nome;
+  btn.onclick = () => {
+    navLembretes.querySelectorAll('.subnav-btn').forEach(b=>b.classList.remove('active'));
+    painelLembretes.querySelectorAll('.procedimento').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('lem-'+proc.id).classList.add('active');
+    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  };
+  navLembretes.appendChild(btn);
+  const div = document.createElement('div');
+  div.className = 'procedimento'+(i===0?' active':'');
+  div.id = 'lem-'+proc.id;
+  let html = `<div class="proc-title">${proc.emoji} ${proc.nome}</div><div class="proc-preco">Lembretes de agendamento</div>`;
+  proc.msgs.forEach((msg, mi) => {
+    if(mi>0) html += `<div class="divisor"><div class="divisor-line"></div><div class="divisor-icon">✦</div><div class="divisor-line"></div></div>`;
+    const id = `lem-${proc.id}-${mi}`;
+    html += `<div class="etapa"><div class="etapa-header"><div class="etapa-num">0${mi+1}</div><div class="etapa-info"><div class="etapa-titulo">${msg.titulo}</div><div class="etapa-quando">${msg.quando}</div></div></div><div class="wpp-bubble" id="${id}">${esc(msg.texto)}<div class="wpp-time">✓✓</div></div><button class="copy-btn" onclick="copiar(this,'${id}')">Copiar mensagem</button></div>`;
+  });
+  div.innerHTML = html;
+  painelLembretes.appendChild(div);
+});
+
+// ─── RENDER PÓS ───────────────────────────────────────────
+const navPos = document.getElementById('nav-pos');
+const painelPos = document.getElementById('painel-pos');
+posProcedimentos.forEach((proc, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'subnav-btn'+(i===0?' active':'');
+  btn.textContent = proc.emoji+' '+proc.nome;
+  btn.onclick = () => {
+    navPos.querySelectorAll('.subnav-btn').forEach(b=>b.classList.remove('active'));
+    painelPos.querySelectorAll('.procedimento').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('pos-'+proc.id).classList.add('active');
+    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  };
+  navPos.appendChild(btn);
+  const div = document.createElement('div');
+  div.className = 'procedimento'+(i===0?' active':'');
+  div.id = 'pos-'+proc.id;
+  let html = `<div class="proc-title">${proc.emoji} ${proc.nome}</div><div class="proc-preco">Orientações pós-procedimento + mensagens de acompanhamento</div>`;
+  html += `<div class="grupo-titulo">📋 Cuidados & Orientações</div>`;
+  proc.cuidados.forEach(g => {
+    html += `<div class="cuidados-box"><h4>${g.titulo}</h4>`;
+    g.itens.forEach(item => { html += `<div class="cuidado-item"><span class="cuidado-dot">✦</span><span>${item}</span></div>`; });
+    html += `</div>`;
+  });
+  html += `<div class="grupo-titulo" style="margin-top:32px">💬 Mensagens de Acompanhamento</div>`;
+  proc.msgs.forEach((msg, mi) => {
+    if(mi>0) html += `<div class="divisor"><div class="divisor-line"></div><div class="divisor-icon">✦</div><div class="divisor-line"></div></div>`;
+    const id = `pos-${proc.id}-${mi}`;
+    html += `<div class="etapa"><div class="etapa-header"><div class="etapa-num">0${mi+1}</div><div class="etapa-info"><div class="etapa-titulo">${msg.titulo}</div><div class="etapa-quando">${msg.quando}</div></div></div><div class="wpp-bubble" id="${id}">${esc(msg.texto)}<div class="wpp-time">✓✓</div></div><button class="copy-btn" onclick="copiar(this,'${id}')">Copiar mensagem</button></div>`;
+  });
+  div.innerHTML = html;
+  painelPos.appendChild(div);
+});
+
+// ─── RENDER RESGATE ───────────────────────────────────────
+const painelResgate = document.getElementById('painel-resgate');
+let rHtml = '';
+Object.values(resgateData).forEach(secao => {
+  rHtml += `<div class="sec-title">${secao.emoji} ${secao.titulo}</div><div class="sec-sub">Mensagens de reativação</div>`;
+  secao.grupos.forEach((grupo, gi) => {
+    rHtml += `<div class="grupo-titulo">${grupo.nome}</div>`;
+    grupo.msgs.forEach((msg, mi) => {
+      const id = `res-${gi}-${mi}-${Math.random().toString(36).substr(2,5)}`;
+      if(mi>0) rHtml += `<div class="divisor"><div class="divisor-line"></div><div class="divisor-icon">✦</div><div class="divisor-line"></div></div>`;
+      rHtml += `<div class="etapa"><div class="etapa-header"><div class="etapa-num">0${mi+1}</div><div class="etapa-info"><div class="etapa-titulo">${msg.titulo}</div></div></div><div class="wpp-bubble" id="${id}">${esc(msg.texto)}<div class="wpp-time">✓✓</div></div><button class="copy-btn" onclick="copiar(this,'${id}')">Copiar mensagem</button></div>`;
+    });
+  });
+  rHtml += `<br>`;
+});
+painelResgate.innerHTML = rHtml;
+
+// ─── UTILITÁRIOS ──────────────────────────────────────────
+function esc(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*([^*]+)\*/g,'<strong>$1</strong>');
+}
+function copiar(btn,id){
+  const el=document.getElementById(id);
+  let text=el.innerText.replace('✓✓','').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✓ Copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar mensagem';btn.classList.remove('copied');},2000);
+  });
+}
+function showTab(tab, clickedBtn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.painel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.subnav-wrap').forEach(s=>s.classList.remove('visible'));
+  if(clickedBtn) clickedBtn.classList.add('active');
+  var painel = document.getElementById('painel-'+tab);
+  if(painel) painel.classList.add('active');
+  if(['captacao','pos','lembretes'].includes(tab)){
+    var subnav = document.getElementById('subnav-'+tab);
+    if(subnav) subnav.classList.add('visible');
+  }
+}
+
+// Tab click listeners
+document.querySelectorAll('.tab-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    showTab(this.getAttribute('data-tab'), this);
+  });
+});
+
+} catch(e) {
+  document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace">Erro JS: ' + e.message + '<br>' + e.stack + '</div>';
+}
+});
+
+</script>
+</body>
+</html>
